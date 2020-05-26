@@ -10,6 +10,24 @@ namespace ApplicationClassLibrary.Connections
 {
     public class SQLServerConnection : IDataConnection
     {
+        public List<Book> GetBooksByUserId(int id)
+        {
+            List<Book> output;
+            try
+            {
+                using (IDbConnection connection = new System.Data.SqlClient.SqlConnection(connectionString))
+                {
+                    var p = new DynamicParameters();
+                    p.Add("@UserID", id);
+                    output = connection.Query<Book>("dbo.spBooks_GetByUserID", p, commandType: CommandType.StoredProcedure).ToList();
+                }
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+            return output;
+        }
         private string connectionString = GlobalSettings.ConnString("Library");
 
         public List<Book> GetBooks_All()

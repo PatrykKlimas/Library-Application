@@ -12,6 +12,44 @@ namespace ApplicationClassLibrary.Connections
     {
         private string connectionString = GlobalSettings.ConnString("MySqlLibrary");
 
+        public List<Book> GetBooksByUserId(int id)
+        {
+            MySqlDataReader myReader;
+            List<Book> output = new List<Book>();
+            Book book = new Book();
+            string query = "SELECT * from Books where userID = \"" + id + "\"";
+            myReader = null;
+            try
+            {
+                myReaderexecute(ref myReader, query);
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+            if (myReader.HasRows)
+            {
+                while (myReader.Read())
+                {
+                    book = new Book
+                    {
+                        Id = myReader.GetInt32(0),
+                        Title = myReader.GetString(1),
+                        Author = myReader.GetString(2),
+                        Publisher = myReader.GetString(3),
+                        UserID = myReader.GetInt32(7),
+                        ISBN = myReader.GetString(8)
+                    };
+                    output.Add(book);
+                }
+
+            }
+
+            myReaderClose(ref myReader);
+            return output;
+        
+    }
+
         public List<Book> GetBooks_All()
         {
             throw new NotImplementedException();
@@ -160,5 +198,7 @@ namespace ApplicationClassLibrary.Connections
             myReader.Close();
             myReader = null;
         }
+
+
     }
 }

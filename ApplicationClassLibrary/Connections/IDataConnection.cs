@@ -12,5 +12,6 @@ namespace ApplicationClassLibrary
         List<Book> GetBooks_All();
         bool InsertUser(User user);
         List<User> UsersGetAll();
+        List<Book> GetBooksByUserId(int id);
     }
 }
