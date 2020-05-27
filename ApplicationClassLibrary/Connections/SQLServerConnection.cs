@@ -10,8 +10,46 @@ namespace ApplicationClassLibrary.Connections
 {
     public class SQLServerConnection : IDataConnection
     {
+        private string connectionString = GlobalSettings.ConnString("Library");
+        public void BorrowBook(int UserID, int BookID)
+        {
+            try
+            {
+                using (IDbConnection connection = new System.Data.SqlClient.SqlConnection(connectionString))
+                {
+                    var p = new DynamicParameters();
+                    p.Add("@UserID", UserID);
+                    p.Add("@BookID", BookID);
+                    connection.Execute("spBooks_Borrow", p, commandType: CommandType.StoredProcedure);
+                }
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+        }
+        public List<Book> GetSearchBooks(string sAutor, string sTitle)
+        {
+            List<Book> output;
+            try
+            {
+                using (IDbConnection connection = new System.Data.SqlClient.SqlConnection(connectionString))
+                {
+                    var p = new DynamicParameters();
+                    p.Add("@Author", sAutor);
+                    p.Add("@Title", sTitle);
+                    output = connection.Query<Book>("spBooks_ByAuthAndTitle", p, commandType: CommandType.StoredProcedure).ToList();
+                }
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+            return output;
+        }
         public List<Book> GetBooksByUserId(int id)
         {
+
             List<Book> output;
             try
             {
@@ -28,7 +66,7 @@ namespace ApplicationClassLibrary.Connections
             }
             return output;
         }
-        private string connectionString = GlobalSettings.ConnString("Library");
+        
 
         public List<Book> GetBooks_All()
         {
@@ -108,5 +146,7 @@ namespace ApplicationClassLibrary.Connections
             }
             return users;
         }
+
+
     }
 }
