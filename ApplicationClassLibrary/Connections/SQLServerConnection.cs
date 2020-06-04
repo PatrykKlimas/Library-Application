@@ -11,6 +11,77 @@ namespace ApplicationClassLibrary.Connections
     public class SQLServerConnection : IDataConnection
     {
         private string connectionString = GlobalSettings.ConnString("Library");
+        public void DeleteBook(int bookId)
+        {
+            try
+            {
+                using (IDbConnection connection = new System.Data.SqlClient.SqlConnection(connectionString))
+                {
+                    var p = new DynamicParameters();
+                    p.Add("@Id", bookId);
+                    connection.Execute("spBook_Delete", p, commandType: CommandType.StoredProcedure);
+                }
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+        }
+        public List<User> SearchForUser(string FName, string LName)
+        {
+            List<User> output;
+            try
+            {
+                using (IDbConnection connection = new System.Data.SqlClient.SqlConnection(connectionString))
+                {
+                    var p = new DynamicParameters();
+                    p.Add("@FirstName", FName);
+                    p.Add("@LastName", LName);
+                    output = connection.Query<User>("spUsers_Search", p, commandType: CommandType.StoredProcedure).ToList();
+                }
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+            return output;
+        }
+        public void UpdatePassword(string password, int id)
+        {
+            try
+            {
+                using (IDbConnection connection = new System.Data.SqlClient.SqlConnection(connectionString))
+                {
+                    var p = new DynamicParameters();
+                    p.Add("@spassword", password);
+                    p.Add("@id", id);
+                    connection.Execute("spUsers_UpdatePassword", p, commandType: CommandType.StoredProcedure);
+                }
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+        }
+        public void UpdateUserData(string FirstName, string LastName, string sEmail, int id)
+        {
+            try
+            {
+                using (IDbConnection connection = new System.Data.SqlClient.SqlConnection(connectionString))
+                {
+                    var p = new DynamicParameters();
+                    p.Add("@FirstName", FirstName);
+                    p.Add("@LastName", LastName);
+                    p.Add("@Email", sEmail);
+                    p.Add("@id", id);
+                    connection.Execute("spUsers_Update", p, commandType: CommandType.StoredProcedure);
+                }
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+        }
         public void BorrowBook(int UserID, int BookID)
         {
             try
@@ -118,7 +189,7 @@ namespace ApplicationClassLibrary.Connections
                     p.Add("@@Login", user.LoginStr);
                     p.Add("@Email", user.Email);
                     p.Add("@Password", user.spassword);
-                    p.Add("@bAdmin", user.Admin);
+                    p.Add("@bAdmin", user.bAdmin);
 
                     connection.Execute("dbo.spUser_Insert", p, commandType: CommandType.StoredProcedure);
                 }

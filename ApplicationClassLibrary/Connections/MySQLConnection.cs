@@ -11,6 +11,79 @@ namespace ApplicationClassLibrary.Connections
     public class MySQLConnection : IDataConnection
     {
         private string connectionString = GlobalSettings.ConnString("MySqlLibrary");
+        public void DeleteBook(int bookId)
+        {
+            string query = "Delete from books where Id  = " + bookId;
+            try
+            {
+                MySQLInsert(query);
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+        }
+        public List<User> SearchForUser(string FName, string LName)
+        {
+            MySqlDataReader myReader;
+            List<User> output = new List<User>();
+            User user = new User();
+            string query = "SELECT id, FirstName, LastName, LoginStr, spassword, Email, bAdmin from users where FirstName like \"%" + FName + "%\" and LastName like \"%" + LName + "%\"";
+            myReader = null;
+            try
+            {
+                myReaderexecute(ref myReader, query);
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+            if (myReader.HasRows)
+            {
+                while (myReader.Read())
+                {
+                    user = new User
+                    {
+                        id = myReader.GetInt32(0),
+                        FirstName = myReader.GetString(1),
+                        LastName = myReader.GetString(2),
+                        LoginStr = myReader.GetString(3),
+                        spassword = myReader.GetString(4),
+                        Email = myReader.GetString(5),
+                        bAdmin = myReader.GetBoolean(6)
+                    };
+                    output.Add(user);
+                }
+            }
+
+            myReaderClose(ref myReader);
+            return output;
+        }
+        public void UpdatePassword(string password, int id)
+        {
+            string query = "UPDATE users SET spassword  = \"" + password + "\"  where Id = " + id;
+            try
+            {
+                MySQLInsert(query);
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+        }
+        public void UpdateUserData(string FirstName, string LastName, string sEmail, int id)
+        {
+            string query = "UPDATE users SET FirstName  = \"" + FirstName + "\", LastName = \"" + LastName + "\", Email =\"" + sEmail + "\"  where Id = " + id;
+            try
+            {
+                MySQLInsert(query);
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+        }
+
         public void BorrowBook(int UserID, int BookID)
         {
             string query = "UPDATE books SET userID = " + UserID + " where Id =" + BookID;
@@ -130,7 +203,7 @@ namespace ApplicationClassLibrary.Connections
                         LoginStr = myReader.GetString(3),
                         spassword = myReader.GetString(4),
                         Email = myReader.GetString(5),
-                        Admin = myReader.GetBoolean(6)
+                        bAdmin = myReader.GetBoolean(6)
                     };
                 }
                 else
@@ -149,7 +222,7 @@ namespace ApplicationClassLibrary.Connections
 
         public bool InsertUser(User user)
         {
-            string admin = user.Admin ? "TRUE" : "FALSE";
+            string admin = user.bAdmin ? "TRUE" : "FALSE";
             string query = "INSERT INTO users(FirstName, LastName, LoginStr, spassword, Email, bAdmin) " +
                                 "VALUES (\"" + user.FirstName + "\",\"" + user.LastName + "\",\"" + user.LoginStr + "\",\"" + user.spassword + "\",\"" + user.Email + "\"," + admin + ")";
 
@@ -193,7 +266,7 @@ namespace ApplicationClassLibrary.Connections
                         LoginStr = myReader.GetString(3),
                         spassword = myReader.GetString(4),
                         Email = myReader.GetString(5),
-                        Admin = myReader.GetBoolean(6)
+                        bAdmin = myReader.GetBoolean(6)
                     };
                     output.Add(user);
                 }
@@ -245,7 +318,5 @@ namespace ApplicationClassLibrary.Connections
             myReader.Close();
             myReader = null;
         }
-
-
     }
 }

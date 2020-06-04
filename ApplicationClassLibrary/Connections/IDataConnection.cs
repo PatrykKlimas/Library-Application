@@ -15,5 +15,9 @@ namespace ApplicationClassLibrary
         List<Book> GetBooksByUserId(int id);
         List<Book> GetSearchBooks(string sAutor, string sTitle);
         void BorrowBook(int UserID, int BookID);
+        void UpdateUserData(string FirstName, string LastName, string sEmail, int id);
+        void UpdatePassword(string password, int id);
+        List<User> SearchForUser(string FName, string LName);
+        void DeleteBook(int bookId);
     }
 }

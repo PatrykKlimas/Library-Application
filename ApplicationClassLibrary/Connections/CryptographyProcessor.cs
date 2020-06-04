@@ -118,6 +118,31 @@ namespace ApplicationClassLibrary.Connections
         {
             Regex r = new Regex("^[a-zA-Z]{3,50}$");
 
+            string s = UpdateValidation(FirstName, LastName, Email);
+
+            if (!s.Equals(string.Empty))
+            {
+                return s;
+            }
+
+            r = new Regex("^[a-zA-Z0-9]{3,50}$");
+            if (!r.IsMatch(login))
+            {
+                return "Login should contain at least 3 characters or numbers.";
+            }
+
+            s = UpdatePassword(password1, password2);
+            if (s.Equals(string.Empty))
+            {
+                return s;
+            }
+
+            return string.Empty;
+        }
+        public static string UpdateValidation(string FirstName, string LastName, string Email)
+        {
+            Regex r = new Regex("^[a-zA-Z]{3,50}$");
+
             if (!r.IsMatch(FirstName))
             {
                 return "First name should not contain spaces and numbers. It should contains 3 to 500 characters";
@@ -128,25 +153,23 @@ namespace ApplicationClassLibrary.Connections
             {
                 return "Wrong last name format. There should be 3 to 500 characters space or dash.";
             }
-            r = new Regex("^[a-zA-Z0-9]{3,50}$");
-            if (!r.IsMatch(login))
-            {
-                return "Login should contain at least 3 characters or numbers.";
-            }
             r = new Regex(@"^(?!\.)(""([^""\r\\]|\\[""\r\\])*""|"
-            + @"([-a-z0-9!#$%&'*+/=?^_`{|}~]|(?<!\.)\.)*)(?<!\.)"
-            + @"@[a-z0-9][\w\.-]*[a-z0-9]\.[a-z][a-z\.]*[a-z]$");
+                        + @"([-a-z0-9!#$%&'*+/=?^_`{|}~]|(?<!\.)\.)*)(?<!\.)"
+                        + @"@[a-z0-9][\w\.-]*[a-z0-9]\.[a-z][a-z\.]*[a-z]$");
 
             if (!r.IsMatch(Email))
             {
                 return "Email address not valid";
             }
-
+            return string.Empty;
+        }
+        public static string UpdatePassword(string password1, string password2)
+        {
             if (!password1.Equals(password2))
             {
                 return "Paswords differs.";
             }
-            if(password1.Length <3 || password1.Length > 20)
+            if (password1.Length < 3 || password1.Length > 20)
             {
                 return "Password should contain 3 to 20 characters";
             }
@@ -161,11 +184,11 @@ namespace ApplicationClassLibrary.Connections
             {
                 users = GlobalSettings.Connection.UsersGetAll();
             }
-            catch(Exception)
+            catch (Exception)
             {
                 return "We have problem with database connection.";
             }
-            if (users.Exists(x => x.Email.Equals(user.Email) ))
+            if (users.Exists(x => x.Email.Equals(user.Email)))
             {
                 return "Email already exists";
             }

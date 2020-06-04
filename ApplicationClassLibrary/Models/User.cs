@@ -14,7 +14,15 @@ namespace ApplicationClassLibrary
         public string LoginStr { get; set; }
         public string spassword { get; set; }
         public string Email { get; set; }
-        public bool Admin { get; set; }
-
+        public bool bAdmin { get; set; }
+        public string Display
+        {
+            get
+            {
+                string output;
+                output = FirstName + ", " + LastName + ", " + LoginStr;
+                return output;
+            }
+        }
     }
 }
