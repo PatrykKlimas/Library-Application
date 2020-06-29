@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ApplicationClassLibrary.Models;
 using MySql.Data.MySqlClient;
 
 namespace ApplicationClassLibrary.Connections
@@ -11,6 +12,298 @@ namespace ApplicationClassLibrary.Connections
     public class MySQLConnection : IDataConnection
     {
         private string connectionString = GlobalSettings.ConnString("MySqlLibrary");
+        public void ReturnBook(int bookID)
+        {
+            string query;
+            try
+            {
+                query = "Delete from BorrowDetails where BookID = " + bookID;
+                MySQLInsert(query);
+                query = "Update Books set userID = 0 where Id = " + bookID;
+                MySQLInsert(query);
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+        }
+        public void ExtendReturnDate(int bookID)
+        {
+            string query;
+            try
+            {
+                query = "Update borrowdetails set bExtended = TRUE, returnDate =" + DateTime.Today.AddDays(14) + "where BookID = " + bookID;
+                MySQLInsert(query);
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+        }
+        bool IDataConnection.WasExtended(int bookID)
+        {
+            MySqlDataReader myReader;
+            bool output = false;
+
+            string query = "Select bExtended from BorrowDetails WHERE BookID =  " +bookID;
+            myReader = null;
+            try
+            {
+                myReaderexecute(ref myReader, query);
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+            if (myReader.HasRows)
+            {
+                while (myReader.Read())
+                {
+                    output = myReader.GetBoolean(0);
+                }
+            }
+            else
+            {
+                output = false;
+            }
+
+            return output;
+        }
+        public void ChangeReturnDate(int bookID)
+        {
+            string query;
+            try
+            {
+                query = "Insert into borrowdetails(BookID, bExtended, returnDate) values (" + bookID + ",FALSE," + DateTime.Today.AddDays(14) + ")";
+                MySQLInsert(query);
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+        }
+        public DateTime GetDateByBookID(int id)
+        {
+            MySqlDataReader myReader;
+            List<Section> bookSections = new List<Section>();
+            DateTime output = new DateTime();
+
+            string query = "SELECT retrunDate from borrowdetails where BookID = " + id;
+            myReader = null;
+            try
+            {
+                myReaderexecute(ref myReader, query);
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+            if (myReader.HasRows)
+            {
+                while (myReader.Read())
+                {
+                    output = myReader.GetDateTime(0);
+                }
+            }
+            else
+            {
+                output = DateTime.MinValue;
+            }
+
+            return output;
+
+        }
+        public void EditBook(Book book, string Title, string Author, string Publisher, string sType, string Section, string ISBN, string Desctiption)
+        {
+            List<Section> bookSections = new List<Section>();
+            string query;
+            int iType;
+            int iSection;
+            try
+            {
+                iType = GetTypeByName(sType);
+                iSection = GetSectionByName(Section);
+                query = "update books set Author =\"" + Author + "\",ISBN=\"" + ISBN + "\", Publisher=\"" + Publisher + "\"," +
+                             " sDescription =\"" + Desctiption + "\", SectionID=" + iSection + ",Title=\"" + Title + "\", TypeID = " + iType + "" +
+                             " where books.Id =" + book.Id;         
+                MySQLInsert(query);
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+        }
+        public void AddBook(string Title, string Author, string Publisher, string sType, string Section, string ISBN, string Desctiption)
+        {
+            List<Section> bookSections = new List<Section>();
+            string query;
+            try
+            {
+                int iType;
+                int iSection;
+                iType = GetTypeByName(sType);
+                iSection = GetSectionByName(Section);
+                query = "insert into books(Author, ISBN, Publisher, sDescription, SectionID, Title, TypeID) values (" +
+                            "\"" + Author + "\"," +
+                            "\"" + ISBN + "\"," +
+                            "\"" + Publisher + "\"," +
+                            "\"" + Desctiption + "\"," +
+                              iSection + "," +
+                            "\"" + Title + "\"," +
+                            iType + ")";
+                MySQLInsert(query);
+
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+        }
+        private int GetSectionByName(string name)
+        {
+            MySqlDataReader myReader;
+            List<Section> bookSections = new List<Section>();
+            int output;
+
+            string query = "SELECT Id, Section from section";
+            myReader = null;
+            try
+            {
+                myReaderexecute(ref myReader, query);
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+            if (myReader.HasRows)
+            {
+                while (myReader.Read())
+                {
+                    bookSections.Add(new Section
+                    {
+                        Id = myReader.GetInt32(0),
+                        Name = myReader.GetString(1)
+                    });
+                }
+            }
+            if (bookSections.Exists(x => x.Name.Equals(name)))
+            {
+                output = bookSections.Where(x => x.Name.Equals(name)).First().Id;
+            }
+            else
+            {
+                query = "Insert into section(Id, Section) values (" + (bookSections.OrderBy(x => x.Id).Last().Id + 1) + ", \"" + name + "\")";
+                myReader = null;
+                try
+                {
+                    myReaderexecute(ref myReader, query);
+                }
+                catch (Exception e)
+                {
+                    throw e;
+                }
+                output = (bookSections.OrderBy(x => x.Id).Last().Id + 1);
+            }
+            myReaderClose(ref myReader);
+            return output;
+        }
+        private int GetTypeByName(string name)
+        {
+            MySqlDataReader myReader;
+            List<BookType> bookTypes = new List<BookType>();
+            int output;
+
+            string query = "SELECT Id, sType from booktype";
+            myReader = null;
+            try
+            {
+                myReaderexecute(ref myReader, query);
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+            if (myReader.HasRows)
+            {
+                while (myReader.Read())
+                {
+                    bookTypes.Add(new BookType { 
+                    Id =  myReader.GetInt32(0),
+                    Name =  myReader.GetString(1)
+                        });
+            }
+            }
+            if (bookTypes.Exists(x => x.Name.Equals(name)))
+            {
+                output = bookTypes.Where(x => x.Name.Equals(name)).First().Id;
+            }
+            else{
+                query = "Insert into booktype(Id, sType) values (" + (bookTypes.OrderBy(x => x.Id).Last().Id+1) + ", \"" + name + "\")" ;
+                myReader = null;
+                try
+                {
+                    myReaderexecute(ref myReader, query);
+                }
+                catch (Exception e)
+                {
+                    throw e;
+                }
+                output = bookTypes.OrderBy(x => x.Id).Last().Id + 1;
+            }
+            myReaderClose(ref myReader);
+            return output;
+        }
+        public string GetTypeByBookId(int id)
+        {
+            MySqlDataReader myReader;
+            List<string> output = new List<string>();
+            string query = "SELECT sType from books right join booktype on booktype.Id = books.TypeID where books.Id = " + id;
+            myReader = null;
+            try
+            {
+                myReaderexecute(ref myReader, query);
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+            if (myReader.HasRows)
+            {
+                while (myReader.Read())
+                {
+                    output.Add(myReader.GetString(0));
+                }
+            }
+
+            myReaderClose(ref myReader);
+            return output.Count > 0 ? output.First() : string.Empty;
+        }
+
+        public string GetSectionByBookId(int id)
+        {
+            MySqlDataReader myReader;
+            List<string> output = new List<string>();
+            string query = "select Section from books right join section on section.Id = books.SectionID where books.id= " + id;
+            myReader = null;
+            try
+            {
+                myReaderexecute(ref myReader, query);
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+            if (myReader.HasRows)
+            {
+                while (myReader.Read())
+                {
+                    output.Add(myReader.GetString(0));
+                }
+            }
+
+            myReaderClose(ref myReader);
+            return output.Count > 0 ? output.First() : string.Empty;
+        }
         public void DeleteBook(int bookId)
         {
             string query = "Delete from books where Id  = " + bookId;
@@ -120,11 +413,28 @@ namespace ApplicationClassLibrary.Connections
                         Id = myReader.GetInt32(0),
                         Title = myReader.GetString(1),
                         Author = myReader.GetString(2),
-                        Publisher = myReader.GetString(3),
-                        UserID = myReader.GetInt32(7),
-                        ISBN = myReader.GetString(8)
+                        Type = myReader.GetInt32(4),
+                        Section = myReader.GetInt32(5),
+                        ISBN = myReader.GetString(8),
                     };
+                    
+                    try
+                    {
+                        book.sDescription = myReader.GetString(6) != null ? myReader.GetString(6) : string.Empty;
+                    }
+                    catch (Exception) { };
+                    try
+                    {
+                        book.Publisher = myReader.GetString(3) != null ? myReader.GetString(3) : string.Empty;
+                    }
+                    catch (Exception) { };
+                    try
+                    {
+                        book.UserID = myReader.GetInt32(7);
+                    }
+                    catch (Exception) { };
                     output.Add(book);
+
                 }
 
             }
@@ -318,5 +628,6 @@ namespace ApplicationClassLibrary.Connections
             myReader.Close();
             myReader = null;
         }
+
     }
 }

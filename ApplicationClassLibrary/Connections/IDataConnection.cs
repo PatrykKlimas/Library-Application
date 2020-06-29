@@ -19,5 +19,16 @@ namespace ApplicationClassLibrary
         void UpdatePassword(string password, int id);
         List<User> SearchForUser(string FName, string LName);
         void DeleteBook(int bookId);
+        string GetTypeByBookId(int id);
+        string GetSectionByBookId(int id);
+        void AddBook(string Title, string Author, string Publisher,
+                       string sType, string Section, string ISBN, string Desctiption);
+        void EditBook(Book book ,string Title, string Author, string Publisher,
+                       string sType, string Section, string ISBN, string Desctiption);
+        DateTime GetDateByBookID(int id);
+        void ChangeReturnDate(int bookID);
+        bool WasExtended(int bookID);
+        void ExtendReturnDate(int bookID);
+        void ReturnBook(int bookID);
     }
 }

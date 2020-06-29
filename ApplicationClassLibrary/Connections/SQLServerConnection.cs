@@ -11,6 +11,288 @@ namespace ApplicationClassLibrary.Connections
     public class SQLServerConnection : IDataConnection
     {
         private string connectionString = GlobalSettings.ConnString("Library");
+        public void ReturnBook(int bookID)
+        {
+
+            try
+            {
+                using (IDbConnection connection = new System.Data.SqlClient.SqlConnection(connectionString))
+                {
+                    var p = new DynamicParameters();
+                    p.Add("@BookId", bookID);
+                    connection.Execute("spBook_Return", p, commandType: CommandType.StoredProcedure);
+                }
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+
+        }
+        public void ExtendReturnDate(int bookID)
+        {
+            try
+            {
+                using (IDbConnection connection = new System.Data.SqlClient.SqlConnection(connectionString))
+                {
+                    var p = new DynamicParameters();
+                    p.Add("@BookId", bookID);
+                    connection.Execute("spBookDetails_ExtendReturnDate", p, commandType: CommandType.StoredProcedure);
+                }
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+        }
+        public bool WasExtended(int bookID)
+        {
+            bool output;
+            try
+            {
+                using (IDbConnection connection = new System.Data.SqlClient.SqlConnection(connectionString))
+                {
+                    var p = new DynamicParameters();
+                    p.Add("@BookID", bookID);
+
+                    output = connection.Query<bool>("spBookDetails_WasExtended", p, commandType: CommandType.StoredProcedure).ToList().First();
+
+                }
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+            return output;
+
+
+        }
+        public void ChangeReturnDate(int bookID)
+        {
+            try
+            {
+                using (IDbConnection connection = new System.Data.SqlClient.SqlConnection(connectionString))
+                {
+                    var p = new DynamicParameters();
+                    p.Add("@BookId", bookID);
+                    connection.Execute("spBookDetails_ReturnDateAdd", p, commandType: CommandType.StoredProcedure);
+                }
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+        }
+        public DateTime GetDateByBookID(int id)
+        {
+            DateTime output;
+            try
+            {
+                using (IDbConnection connection = new System.Data.SqlClient.SqlConnection(connectionString))
+                {
+                    var p = new DynamicParameters();
+                    p.Add("@BookID", id);
+
+                    output = connection.Query<DateTime>("spBook_ReturnDate", p, commandType: CommandType.StoredProcedure).ToList().First();
+
+                }
+            }
+            catch (Exception e)
+            {
+                output = DateTime.MinValue;
+            }
+            return output;
+        }
+        public void EditBook(Book book, string Title, string Author, string Publisher, string sType, string Section, string ISBN, string Desctiption)
+        {
+            int iType;
+            int iSection;
+            iType = GetTypeByName(sType);
+            iSection = GetSectionByName(Section);
+            try
+            {
+                iType = GetTypeByName(sType);
+                iSection = GetSectionByName(Section);
+                using (IDbConnection connection = new System.Data.SqlClient.SqlConnection(connectionString))
+                {
+                    var p = new DynamicParameters();
+                    p.Add("@Id", book.Id);
+                    p.Add("@Title", Title);
+                    p.Add("@Author", Author);
+                    p.Add("@Publisher", Publisher);
+                    p.Add("@TypeID", iType);
+                    p.Add("@SectionID", iSection);
+                    p.Add("@sDescription", Desctiption);
+                    p.Add("@ISBN", ISBN);
+                    connection.Execute("spBook_Update", p, commandType: CommandType.StoredProcedure);
+                }
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+        }
+        public void AddBook(string Title, string Author, string Publisher, string sType, string Section, string ISBN, string Desctiption)
+        {
+            try
+            {
+                int iType;
+                int iSection;
+                iType = GetTypeByName(sType);
+                iSection = GetSectionByName(Section);
+                using (IDbConnection connection = new System.Data.SqlClient.SqlConnection(connectionString))
+                {
+                    var p = new DynamicParameters();
+                    p.Add("@Title", Title);
+                    p.Add("@Author", Author);
+                    p.Add("@Publisher", Publisher);
+                    p.Add("@TypeID", iType);
+                    p.Add("@SectionID", iSection);
+                    p.Add("@sDescription", Desctiption);
+                    p.Add("@ISBN", ISBN);
+                    connection.Execute("spBook_Add", p, commandType: CommandType.StoredProcedure);
+                }
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+        }
+        private int GetSectionByName(string name)
+        {
+            int output = 0;
+            try
+            {
+                using (IDbConnection connection = new System.Data.SqlClient.SqlConnection(connectionString))
+                {
+                    var p = new DynamicParameters();
+                    p.Add("@name", name);
+                    if (connection.Query<int>("spGet_SectionByName", p, commandType: CommandType.StoredProcedure).ToList().Count > 0)
+                    {
+                        output = connection.Query<int>("spGet_SectionByName", p, commandType: CommandType.StoredProcedure).ToList().First();
+                    }
+                    else
+                    {
+                        output = 0;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+            if (output == 0)
+            {
+                try
+                {
+                    using (IDbConnection connection = new System.Data.SqlClient.SqlConnection(connectionString))
+                    {
+                        var p = new DynamicParameters();
+                        p.Add("@name", name);
+                        p.Add("@id", output);
+                        connection.Execute("spCreate_Section", p, commandType: CommandType.StoredProcedure);
+                    }
+                }
+                catch (Exception e)
+                {
+                    throw e;
+                }
+            }
+            return output;
+        }
+        private int GetTypeByName(string name)
+        {
+            int output = 0;
+            try
+            {
+                using (IDbConnection connection = new System.Data.SqlClient.SqlConnection(connectionString))
+                {
+                    var p = new DynamicParameters();
+                    p.Add("@name", name);
+                    if (connection.Query<int>("spGet_TypeByName", p, commandType: CommandType.StoredProcedure).ToList().Count > 0)
+                    {
+                        output = connection.Query<int>("spGet_TypeByName", p, commandType: CommandType.StoredProcedure).ToList().First();
+                    }
+                    else
+                    {
+                        output = 0;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+            if (output == 0)
+            {
+                try
+                {
+                    using (IDbConnection connection = new System.Data.SqlClient.SqlConnection(connectionString))
+                    {
+                        var p = new DynamicParameters();
+                        p.Add("@name", name);
+                        p.Add("@id", output);
+                        connection.Execute("spCreate_Type", p, commandType: CommandType.StoredProcedure);
+                    }
+                }
+                catch (Exception e)
+                {
+                    throw e;
+                }
+            }
+            return output;
+        }
+        public string GetTypeByBookId(int id)
+        {
+            string output;
+            try
+            {
+                using (IDbConnection connection = new System.Data.SqlClient.SqlConnection(connectionString))
+                {
+                    var p = new DynamicParameters();
+                    p.Add("@id", id);
+                    if (connection.Query<string>("spGet_TypeByBookID", p, commandType: CommandType.StoredProcedure).ToList() != null)
+                    {
+                        output = connection.Query<string>("spGet_TypeByBookID", p, commandType: CommandType.StoredProcedure).ToList().First();
+                    }
+                    else
+                    {
+                        output = string.Empty;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+            return output;
+        }
+
+        public string GetSectionByBookId(int id)
+        {
+            string output;
+            try
+            {
+                using (IDbConnection connection = new System.Data.SqlClient.SqlConnection(connectionString))
+                {
+                    var p = new DynamicParameters();
+                    p.Add("@id", id);
+                    if (connection.Query<string>("spGet_SectionByBookID", p, commandType: CommandType.StoredProcedure).ToList() != null)
+                    {
+                        output = connection.Query<string>("spGet_SectionByBookID", p, commandType: CommandType.StoredProcedure).ToList().First();
+                    }
+                    else
+                    {
+                        output = string.Empty;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+            return output;
+        }
         public void DeleteBook(int bookId)
         {
             try
@@ -137,7 +419,7 @@ namespace ApplicationClassLibrary.Connections
             }
             return output;
         }
-        
+
 
         public List<Book> GetBooks_All()
         {
@@ -154,10 +436,10 @@ namespace ApplicationClassLibrary.Connections
                 {
                     var p = new DynamicParameters();
                     p.Add("@login", login);
-                     if(connection.Query<User>("dbo.spUsers_GetByLogin", p, commandType: CommandType.StoredProcedure) != null)
+                    if (connection.Query<User>("dbo.spUsers_GetByLogin", p, commandType: CommandType.StoredProcedure) != null)
                     {
                         user = connection.Query<User>("dbo.spUsers_GetByLogin", p, commandType: CommandType.StoredProcedure).ToList().First();
-                        if(!CryptographyProcessor.Verify(password, user.spassword ))
+                        if (!CryptographyProcessor.Verify(password, user.spassword))
                         {
                             user = null;
                         }
