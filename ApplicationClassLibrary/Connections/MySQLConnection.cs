@@ -32,10 +32,10 @@ namespace ApplicationClassLibrary.Connections
             string query;
             try
             {
-                query = "Update borrowdetails set bExtended = TRUE, returnDate =" + DateTime.Today.AddDays(14) + "where BookID = " + bookID;
+                query = "Update borrowdetails set bExtended = TRUE, retrunDate =\"" + DateTime.Today.AddDays(14) + "\" where BookID = " + bookID;
                 MySQLInsert(query);
             }
-            catch (Exception e)
+            catch (Exception e) 
             {
                 throw e;
             }
@@ -74,7 +74,7 @@ namespace ApplicationClassLibrary.Connections
             string query;
             try
             {
-                query = "Insert into borrowdetails(BookID, bExtended, returnDate) values (" + bookID + ",FALSE," + DateTime.Today.AddDays(14) + ")";
+                query = "Insert into borrowdetails(BookID, bExtended, retrunDate) values (" + bookID + ",FALSE," + "\"" + DateTime.Today.AddDays(14) + "\")";
                 MySQLInsert(query);
             }
             catch (Exception e)
