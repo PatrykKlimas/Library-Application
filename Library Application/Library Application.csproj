@@ -87,6 +87,12 @@
     <Compile Include="UserAdminForm.Designer.cs">
       <DependentUpon>UserAdminForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="UserBooksForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UserBooksForm.Designer.cs">
+      <DependentUpon>UserBooksForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="UserNoAdminForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -119,6 +125,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="UserAdminForm.resx">
       <DependentUpon>UserAdminForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UserBooksForm.resx">
+      <DependentUpon>UserBooksForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="UserNoAdminForm.resx">
       <DependentUpon>UserNoAdminForm.cs</DependentUpon>

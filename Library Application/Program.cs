@@ -17,7 +17,7 @@ namespace Library_Application
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             //Initialize the database connections
-            ApplicationClassLibrary.GlobalSettings.InitializeConnection(ApplicationClassLibrary.DataBaseType.MySQL); 
+            ApplicationClassLibrary.GlobalSettings.InitializeConnection(ApplicationClassLibrary.DataBaseType.SQLServer); 
             Application.Run(new LogInForm());
         }
     }

@@ -97,7 +97,7 @@ namespace ApplicationClassLibrary.Connections
 
                 }
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 output = DateTime.MinValue;
             }
